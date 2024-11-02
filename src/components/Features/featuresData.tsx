@@ -17,9 +17,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Free and Open-Source",
-    paragraph: "Lorem Ipsum is simply dummy text of the printing and industry.",
-    btn: "Learn More",
+    title: "Innovative Crop Cultivation",
+    paragraph: "Discover advanced techniques grounded in agricultural science to boost crop productivity and farm sustainability.",
+    btn: "Explore Techniques",
     btnLink: "/#",
   },
   {
@@ -38,9 +38,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "Modern Design",
-    paragraph: "Lorem Ipsum is simply dummy text of the printing and industry.",
-    btn: "Learn More",
+    title: "Farming Resources & Insights",
+    paragraph: "Discover a wealth of resources, expert tips, and blog articles designed to help farmers grow more efficiently and sustainably.",
+    btn: "Explore Now",
     btnLink: "/#",
   },
   {
@@ -91,9 +91,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "SaaS Starter Kit",
-    paragraph: "Lorem Ipsum is simply dummy text of the printing and industry.",
-    btn: "Learn More",
+    title: "Expert Farming Guidance",
+    paragraph: "Get personalized support from experienced instructors to implement scientific methods that improve crop growth and farm efficiency.",
+    btn: "Get Started",
     btnLink: "/#",
   },
   {
@@ -124,9 +124,9 @@ const featuresData: Feature[] = [
         />
       </svg>
     ),
-    title: "All Essential Integrations",
-    paragraph: "Lorem Ipsum is simply dummy text of the printing and industry.",
-    btn: "Learn More",
+    title: "Dedicated Farmer Support",
+    paragraph: "Our dedicated customer support team is here to assist you with all your farming needs, ensuring you have the resources to succeed.",
+    btn: "Contact Support",
     btnLink: "/#",
   },
 ];
