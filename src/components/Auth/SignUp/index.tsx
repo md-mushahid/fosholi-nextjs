@@ -1,12 +1,8 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import SocialSignIn from "../SocialSignIn";
-import SwitchOption from "../SwitchOption";
 import { useState } from "react";
-import MagicLink from "../MagicLink";
 import Loader from "@/components/Common/Loader";
 
 const SignUp = () => {
@@ -16,21 +12,26 @@ const SignUp = () => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-
     setLoading(true);
     const data = new FormData(e.currentTarget);
     const value = Object.fromEntries(data.entries());
     const finalData = { ...value };
 
-    fetch("/api/register", {
+    fetch("http://127.0.0.1:3333/admin/signup", {  // Update the API endpoint here
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(finalData),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to register'); // Handle response error
+        }
+        return res.json();
+      })
       .then((data) => {
+        console.log(data);
         toast.success("Successfully registered");
         setLoading(false);
         router.push("/signin");
