@@ -1,4 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
+// @ts-nocheck
+
 "use client";
 import { useState } from "react";
 
