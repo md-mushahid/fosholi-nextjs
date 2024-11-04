@@ -1,15 +1,42 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-
+import { usePathname, useRouter } from "next/navigation";
+import { use, useEffect, useRef, useState } from "react";
 import menuData from "./menuData";
+import { roundToNearestHours } from "date-fns";
 
 const Header = () => {
   const { data: session } = useSession();
+  const [user, setUser] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
+
+  const dropdownRef = useRef(null);
+
+  const handleOutsideClick = (e) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      setDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    } else {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    }
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [dropdownOpen]);
+
+  useEffect(() => {
+    const isLogin = localStorage.getItem("login_user_data");
+    if (isLogin) {
+      const userData = JSON.parse(isLogin);
+      setUser(userData);
+    }
+  }, [])
 
   const pathUrl = usePathname();
   // Navbar toggle
@@ -43,12 +70,19 @@ const Header = () => {
 
   const { theme, setTheme } = useTheme();
 
+  const handleSignOut = async() => {
+    localStorage.removeItem("login_user_data");
+    setDropdownOpen(false);
+    setUser(null);
+    router.push("/signin");
+  };
+
   return (
     <>
       <header
         className={`ud-header left-0 top-0 z-40 flex w-full items-center ${sticky
-            ? "shadow-nav fixed z-[999] border-b border-stroke bg-white/80 backdrop-blur-[5px] dark:border-dark-3/20 dark:bg-dark/10"
-            : "absolute bg-transparent"
+          ? "shadow-nav fixed z-[999] border-b border-stroke bg-white/80 backdrop-blur-[5px] dark:border-dark-3/20 dark:bg-dark/10"
+          : "absolute bg-transparent"
           }`}
       >
         <div className="container">
@@ -88,8 +122,8 @@ const Header = () => {
                 <nav
                   id="navbarCollapse"
                   className={`navbar absolute right-0 z-30 w-[250px] rounded border-[.5px] border-body-color/50 bg-white px-6 py-4 duration-300 dark:border-body-color/20 dark:bg-dark-2 lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 lg:dark:bg-transparent ${navbarOpen
-                      ? "visibility top-full opacity-100"
-                      : "invisible top-[120%] opacity-0"
+                    ? "visibility top-full opacity-100"
+                    : "invisible top-[120%] opacity-0"
                     }`}
                 >
                   <ul className="block lg:ml-8 lg:flex lg:gap-x-8 xl:ml-14 xl:gap-x-12">
@@ -111,8 +145,8 @@ const Header = () => {
                               scroll={false}
                               href={menuItem.path}
                               className={`ud-menu-scroll flex py-2 text-base lg:inline-flex lg:px-0 lg:py-6 ${sticky
-                                  ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                                  : "text-body-color dark:text-white lg:text-white"
+                                ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
+                                : "text-body-color dark:text-white lg:text-white"
                                 } ${pathUrl === menuItem?.path &&
                                 sticky &&
                                 "!text-primary"
@@ -151,8 +185,8 @@ const Header = () => {
                             <button
                               onClick={() => handleSubmenu(index)}
                               className={`ud-menu-scroll flex items-center justify-between py-2 text-base lg:inline-flex lg:px-0 lg:py-6 ${sticky
-                                  ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                                  : "text-white"
+                                ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
+                                : "text-white"
                                 }`}
                             >
                               {menuItem.title}
@@ -207,38 +241,47 @@ const Header = () => {
                   </span>
                 </button>
 
-                {session?.user ? (
+                {user ? (
                   <>
-                    <p
-                      className={`loginBtn px-7 py-3 text-base font-medium ${!sticky && pathUrl === "/" ? "text-white" : "text-dark"
-                        }`}
-                    >
-                      {session?.user?.name}
-                    </p>
-                    {pathUrl !== "/" || sticky ? (
-                      <button
-                        onClick={() => signOut()}
-                        className="signUpBtn rounded-lg bg-primary bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark"
-                      >
-                        Sign Out
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => signOut()}
-                        className="signUpBtn rounded-lg bg-white bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-dark"
-                      >
-                        Sign Out
-                      </button>
-                    )}
+                    <div className="relative flex items-center" ref={dropdownRef}>
+                      <img
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        src={user?.profilePicture || "/images/team/blank-profile-picture-973460_640.png"}
+                        alt="Profile"
+                        className="w-10 h-10 rounded-full cursor-pointer"
+                      />
+
+                      {/* Dropdown Menu */}
+                      {dropdownOpen && (
+                        <div
+                          className={`absolute right-0 top-full mt-2 w-48 rounded-lg shadow-lg ${theme === "dark" ? "bg-gray-800" : "bg-white"} p-3 z-50`}
+                        >
+                          <span
+                            onClick={() => {/* Navigate to Dashboard */ }}
+                            className={`block w-full text-left px-4 py-2 text-sm font-medium ${theme === "dark" ? "text-white" : "text-dark"}`}
+                          >
+                            {user?.name}
+                          </span>
+                          <Link href="/dashboard"
+                            className={`block w-full text-left px-4 py-2 text-sm font-medium ${theme === "dark" ? "text-white" : "text-dark"} hover:bg-gray-400`}
+                          >
+                            Dashboard
+                          </Link>
+                          <button
+                            onClick={handleSignOut}
+                            className={`block w-full text-left px-4 py-2 text-sm font-medium ${theme === "dark" ? "text-white" : "text-dark"} hover:bg-gray-400`}
+                          >
+                            Sign Out
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <>
                     {pathUrl !== "/" ? (
                       <>
-                        <Link
-                          href="/signin"
-                          className="px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white"
-                        >
+                        <Link href="/signin" className="px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white">
                           Sign In
                         </Link>
                         <Link
@@ -259,9 +302,7 @@ const Header = () => {
                         </Link>
                         <Link
                           href="/signup"
-                          className={`rounded-lg px-6 py-3 text-base font-medium text-white duration-300 ease-in-out ${sticky
-                              ? "bg-primary hover:bg-primary/90 dark:bg-white/10 dark:hover:bg-white/20"
-                              : "bg-white/10 hover:bg-white/20"
+                          className={`rounded-lg px-6 py-3 text-base font-medium text-white duration-300 ease-in-out ${sticky ? "bg-primary hover:bg-primary/90 dark:bg-white/10 dark:hover:bg-white/20" : "bg-white/10 hover:bg-white/20"
                             }`}
                         >
                           Sign Up
