@@ -7,8 +7,8 @@ const PricingBox = ({ product }: { product: Price }) => {
   // POST request
   const handleSubscription = async (e: any) => {
     e.preventDefault();
-    const { data } = await axios.post(
-      "/api/payment",
+    const data = await axios.post(
+      "http://127.0.0.1:3333/payment",
       {
         priceId: product.id,
       },
@@ -18,7 +18,7 @@ const PricingBox = ({ product }: { product: Price }) => {
         },
       },
     );
-    window.location.assign(data);
+    window.location.href = data.data;
   };
 
   return (
@@ -38,9 +38,12 @@ const PricingBox = ({ product }: { product: Price }) => {
         <h2 className="mb-11 text-4xl font-semibold text-dark dark:text-white xl:text-[42px] xl:leading-[1.21]">
           <span className="text-xl font-medium">$ </span>
           <span className="-ml-1 -tracking-[2px]">
-            {(product.monthly_price || product.one_time_price).toLocaleString("en-US", {
-              currency: "USD",
-            })}
+            {(product.monthly_price || product.one_time_price).toLocaleString(
+              "en-US",
+              {
+                currency: "USD",
+              },
+            )}
           </span>
           <span className="text-base font-normal text-body-color dark:text-dark-6">
             {" "}
