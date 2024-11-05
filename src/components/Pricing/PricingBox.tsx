@@ -33,31 +33,20 @@ const PricingBox = ({ product }: { product: Price }) => {
           </p>
         )}
         <span className="mb-5 block text-xl font-medium text-dark dark:text-white">
-          {product.nickname}
+          {product?.title}
         </span>
         <h2 className="mb-11 text-4xl font-semibold text-dark dark:text-white xl:text-[42px] xl:leading-[1.21]">
           <span className="text-xl font-medium">$ </span>
           <span className="-ml-1 -tracking-[2px]">
-            {(product.unit_amount / 100).toLocaleString("en-US", {
+            {(product.monthly_price || product.one_time_price).toLocaleString("en-US", {
               currency: "USD",
             })}
           </span>
           <span className="text-base font-normal text-body-color dark:text-dark-6">
             {" "}
-            Per Month
+            {product?.is_lifetime_access ? "Lifetime" : "Per Month"}
           </span>
         </h2>
-
-        <div className="mb-[50px]">
-          <h3 className="mb-5 text-lg font-medium text-dark dark:text-white">
-            Features
-          </h3>
-          <div className="mb-10">
-            {product?.offers.map((offer, i) => (
-              <OfferList key={i} text={offer} />
-            ))}
-          </div>
-        </div>
         <div className="w-full">
           <button
             onClick={handleSubscription}

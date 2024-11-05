@@ -2,23 +2,40 @@
 import SectionTitle from "../Common/SectionTitle";
 import PricingBox from "./PricingBox";
 import { pricingData } from "@/stripe/pricingData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Modal, Input, Button, Radio } from "antd"; // Import Radio from antd
+import axios from 'axios'; // Import axios
+import usePricingData from "./usePricingData";
 
 const Pricing = () => {
+  const { data, loading, error } = usePricingData();
   const [programs, setPrograms] = useState(pricingData);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [newProgram, setNewProgram] = useState({
-    id: programs.length + 1,
-    name: "",
-    price: 0,
+    title: "",
     description: "",
+    subscriptionType: "monthly",  // Default to monthly
+    monthlyPrice: null,
+    oneTimePrice: null,
+    // durationInMonths: null,
+    isLifetimeAccess: false,
+    instructorId: user?.id,
   });
+
+  useEffect(() => {
+    const isAnyOneLogin = localStorage.getItem("login_user_data");
+    if (isAnyOneLogin) {
+      const userData = JSON.parse(isAnyOneLogin);
+      setUser(userData);
+    }
+  }, []);
 
   const handleAddProgram = () => {
     setIsModalOpen(true);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setNewProgram((prevProgram) => ({
       ...prevProgram,
@@ -26,16 +43,58 @@ const Pricing = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    setPrograms([...programs, newProgram]);
-    setNewProgram({
-      id: programs.length + 2, // Increment for the next new program
-      name: "",
-      price: 0,
-      description: "",
-    });
-    setIsModalOpen(false);
+  const handleSubscriptionTypeChange = (e: { target: { value: any; }; }) => {
+    setNewProgram((prevProgram) => ({
+      ...prevProgram,
+      subscriptionType: e.target.value,
+    }));
   };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:3333/create-program", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: newProgram.title,
+          description: newProgram.description,
+          subscriptionType: newProgram.subscriptionType, // This should be either 'monthly' or 'one-time'
+          monthlyPrice: newProgram.monthlyPrice,
+          oneTimePrice: newProgram.oneTimePrice,
+          isLifetimeAccess: newProgram.isLifetimeAccess,
+          instructorId: user?.id || 1, // Ensure this is a valid number
+        }),
+      });
+
+      if (response.ok) {
+        const savedProgram = await response.json();
+        // Add the newly created program to the state
+        setPrograms((prevPrograms) => [...prevPrograms, savedProgram]);
+        // Reset the new program state
+        setNewProgram({
+          title: "",
+          description: "",
+          subscriptionType: "", // Reset the subscription type
+          monthlyPrice: null,
+          oneTimePrice: null,
+          isLifetimeAccess: false,
+          instructorId: user?.id || 1,
+        });
+        // Close the modal
+        setIsModalOpen(false);
+        window.location.reload();
+      } else {
+        console.error("Failed to create program:", response.statusText);
+        // Optionally handle validation errors or display a message to the user
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+
 
   return (
     <section
@@ -49,77 +108,105 @@ const Pricing = () => {
             paragraph="Join our comprehensive program designed to empower farmers with the knowledge and skills necessary for modern agricultural practices. Together, we can enhance your productivity and sustainability, ensuring a fruitful future for your farming endeavors."
             center
           />
-
-          <button
+          <Button
             onClick={handleAddProgram}
-            className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="mt-4"
+            type="primary"
+            style={{ backgroundColor: "#1890ff", borderColor: "#1890ff" }}
           >
             Add New Program
-          </button>
+          </Button>
         </div>
 
         {/* Pricing Boxes */}
         <div className="-mx-4 flex flex-wrap justify-center">
-          {programs.map((product, i) => (
+          {data.map((product, i) => (
             <PricingBox key={i} product={product} />
           ))}
         </div>
       </div>
 
       {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Add New Program</h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-              <input
-                type="text"
-                name="name"
-                value={newProgram.name}
-                onChange={handleInputChange}
-                className="mt-1 p-2 border border-gray-300 dark:border-gray-700 rounded w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-                placeholder="Program title"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
-              <input
-                type="number"
-                name="price"
-                value={newProgram.price}
-                onChange={handleInputChange}
-                className="mt-1 p-2 border border-gray-300 dark:border-gray-700 rounded w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-                placeholder="Program price"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-              <textarea
-                name="description"
-                value={newProgram.description}
-                onChange={handleInputChange}
-                className="mt-1 p-2 border border-gray-300 dark:border-gray-700 rounded w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-                placeholder="Program description"
-              />
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="mr-2 px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-              >
-                Add Program
-              </button>
-            </div>
-          </div>
+      <Modal
+        title="Add New Program"
+        visible={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onOk={handleSubmit}
+        okText="Add Program"
+        cancelText="Cancel"
+        bodyStyle={{
+          backgroundColor: document.body.classList.contains("dark")
+            ? "#1f1f1f"
+            : "#ffffff",
+        }}
+        okButtonProps={{
+          style: {
+            backgroundColor: "#1890ff",
+            borderColor: "#1890ff",
+            color: "#ffffff",
+            cursor: "default",
+          },
+        }}
+      >
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+          <Input
+            type="text"
+            name="title"
+            value={newProgram.title}
+            onChange={handleInputChange}
+            placeholder="Program title"
+            className="dark:bg-gray-900 dark:text-gray-100"
+          />
         </div>
-      )}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <Input.TextArea
+            name="description"
+            value={newProgram.description}
+            onChange={handleInputChange}
+            placeholder="Program description"
+            className="dark:bg-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Subscription Type</label>
+          <Radio.Group onChange={handleSubscriptionTypeChange} value={newProgram.subscriptionType}>
+            <Radio value="monthly">Monthly</Radio>
+            <Radio value="one-time">One Time</Radio>
+          </Radio.Group>
+        </div>
+
+        {newProgram.subscriptionType === "monthly" && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Monthly Price</label>
+            <Input
+              type="number"
+              name="monthlyPrice"
+              value={newProgram.monthlyPrice || ''}
+              onChange={handleInputChange}
+              placeholder="Monthly price"
+              className="dark:bg-gray-900 dark:text-gray-100"
+            />
+          </div>
+        )}
+
+        {newProgram.subscriptionType === "one-time" && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">One-Time Price</label>
+            <Input
+              type="number"
+              name="oneTimePrice"
+              value={newProgram.oneTimePrice || ''}
+              onChange={handleInputChange}
+              placeholder="One-time price"
+              className="dark:bg-gray-900 dark:text-gray-100"
+            />
+          </div>
+        )}
+      </Modal>
     </section>
   );
 };
