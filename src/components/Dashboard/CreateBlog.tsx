@@ -1,5 +1,5 @@
 'use client';
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 const CreateBlog = () => {
@@ -18,6 +18,31 @@ const CreateBlog = () => {
     }
   }, []);
 
+  // Function to upload the image to ImageBB
+  const uploadImageToImageBB = async () => {
+    if (!blogImage) return null;
+
+    const formData = new FormData();
+    formData.append("image", blogImage);
+
+    try {
+      const response = await axios.post(
+        `https://api.imgbb.com/1/upload?key=751ba107ccdfcd0750c8d8b97f66956a`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data.data.url; // Return the uploaded image URL
+    } catch (error) {
+      setError("Failed to upload image to ImageBB");
+      console.error("Image upload error:", error);
+      return null;
+    }
+  };
+
   const handleBlogSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -26,22 +51,41 @@ const CreateBlog = () => {
       setError("Please fill in all required fields.");
       return;
     }
+    setIsSubmitting(true); // Set submitting state
     setError(null); // Reset error state on new submission attempt
 
-    const response = await axios.post("http://127.0.0.1:3333/create-blog", {
-      title: blogTitle,
-      content: blogContent,
-      image: blogImage,
-      user_id: user?.id || 0,
-    });
+    try {
+      // Upload the image to ImageBB and get the URL
+      const imageUrl = await uploadImageToImageBB();
 
-    if (response) {
-      alert("Blog post created successfully!");
-      setBlogTitle("");
-      setBlogImage(null);
-      setBlogContent("");
-    } else {
-      setError(`Failed to create blog`);
+      // Check if the image upload was successful
+      if (!imageUrl) {
+        setError("Image upload failed. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Send blog data, including image URL, to your backend API
+      const response = await axios.post("http://127.0.0.1:3333/create-blog", {
+        title: blogTitle,
+        content: blogContent,
+        image: imageUrl, // Save the ImageBB URL
+        user_id: user?.id || 0,
+      });
+
+      if (response.status === 200) {
+        alert("Blog post created successfully!");
+        setBlogTitle("");
+        setBlogImage(null);
+        setBlogContent("");
+      } else {
+        setError("Failed to create blog");
+      }
+    } catch (error) {
+      setError("An error occurred while creating the blog.");
+      console.error("Blog creation error:", error);
+    } finally {
+      setIsSubmitting(false); // Reset submitting state
     }
   };
 
@@ -57,7 +101,7 @@ const CreateBlog = () => {
       <h4 className="text-xl font-semibold mb-4 text-dark dark:text-white">
         Create Blog
       </h4>
-      {error && <p className="text-red-500 mb-4">{error}</p>} {/* Display error if any */}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-dark dark:text-white mb-2">
