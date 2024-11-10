@@ -2,15 +2,19 @@ import axios from "axios";
 import React from "react";
 import OfferList from "./OfferList";
 import { Price } from "@/types/price";
+import { useRouter } from "next/router";
 
 const PricingBox = ({ product }: { product: Price }) => {
   // POST request
   const handleSubscription = async (e: any) => {
     e.preventDefault();
-    const data = await axios.post(
+    const isAnyOneLogin = JSON.parse(localStorage.getItem("login_user_data"));
+    if(!isAnyOneLogin)  window.location.href = 'http://localhost:3000/signin'
+    const res = await axios.post(
       "http://127.0.0.1:3333/payment",
       {
-        priceId: product.id,
+        product,
+        user_id: isAnyOneLogin.id
       },
       {
         headers: {
@@ -18,8 +22,7 @@ const PricingBox = ({ product }: { product: Price }) => {
         },
       },
     );
-    console.log(data);
-    // window.location.href = data.data;
+    window.location.href = res.data.url;
   };
 
   return (
