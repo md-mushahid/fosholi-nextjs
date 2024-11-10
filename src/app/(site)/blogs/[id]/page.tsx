@@ -37,7 +37,7 @@ const BlogPost = ({ params }: Props) => {
     return <p>Loading...</p>;
   }
 
-  const { title, blog_image, content, created_at } = blogData;
+  const { title, blog_image, content, created_at, profile_picture, name } = blogData;
 
   return (
     <section className="pb-10 pt-20 dark:bg-dark lg:pb-20 lg:pt-[120px]">
@@ -60,7 +60,7 @@ const BlogPost = ({ params }: Props) => {
                   <div className="mb-4 mr-5 flex items-center md:mr-10">
                     <div className="mr-4 h-10 w-10 overflow-hidden rounded-full">
                       <Image
-                        src={user.profile_pictur ?? '/images/team/blank-profile-picture-973460_640.png'}
+                        src={profile_picture ?? '/images/team/blank-profile-picture-973460_640.png'}
                         alt="image"
                         className="w-full"
                         width={40}
@@ -70,7 +70,7 @@ const BlogPost = ({ params }: Props) => {
                     <p className="text-base font-medium text-white">
                       By{" "}
                       <Link href="/#" className="text-white hover:opacity-70">
-                        {user?.name ?? ''}
+                        {name ?? ''}
                       </Link>
                     </p>
                   </div>
