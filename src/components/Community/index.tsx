@@ -103,7 +103,7 @@ const Community = () => {
       </section>
 
       {isModalOpen && (
-        <CreatePost setIsModalOpen={setIsModalOpen} />
+        <CreatePost isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
       )}
     </>
   );
