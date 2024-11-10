@@ -18,7 +18,8 @@ const PricingBox = ({ product }: { product: Price }) => {
         },
       },
     );
-    window.location.href = data.data;
+    console.log(data);
+    // window.location.href = data.data;
   };
 
   return (

@@ -1,6 +1,6 @@
+'use client'
 import { useState } from 'react'
 import axios from 'axios'
-import { isNull } from 'util'
 
 const Contact = () => {
   const [name, setName] = useState('');
@@ -8,18 +8,38 @@ const Contact = () => {
   const [message, setMessage] = useState('');
   const [attachment, setAttachment] = useState<File | null>(null);
 
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    const data = {
+      name: name,
+      email: email,
+      message: message,
+      attachment: attachment,
+    };
+    try {
+      const response = await axios.post('http://127.0.0.1:3333/send-us-message', data);
+      if (response.status === 200) {
+        alert('Message sent successfully!');
+        setName('');
+        setEmail('');
+        setAttachment(null);
+        setMessage('');
+      } else {
+        alert('Error sending message');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
 
   return (
     <section id="contact" className="relative py-20 md:py-[120px]">
-      {/* Existing layout and styles */}
       <div className="container px-4">
-        {/* Contact info and form layout */}
         <div className="-mx-4 flex flex-wrap items-center">
           <div className="w-full px-4 lg:w-7/12 xl:w-8/12">
-            {/* Contact information */}
             <div className="ud-contact-content-wrapper">
-              {/* Title */}
               <div className="ud-contact-title mb-12 lg:mb-[150px]">
                 <span className="mb-6 block text-base font-medium text-dark dark:text-white">
                   CONTACT US
@@ -70,7 +90,7 @@ const Contact = () => {
                     type="file"
                     name="attachment"
                     accept="image/*"
-                    onChange={(e)}
+                    onChange={(e)=> setAttachment(e.target.files[0])}
                     className="w-full text-dark placeholder:text-body-color/60 dark:text-white"
                   />
                 </div>
@@ -81,8 +101,8 @@ const Contact = () => {
                   <textarea
                     name="message"
                     rows={4}
-                    value={formData.message}
-                    onChange={handleInputChange}
+                    value={message}
+                    onChange={(e)=> setMessage(e.target.value)}
                     placeholder="Type your message here"
                     className="w-full resize-none border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
                   ></textarea>
