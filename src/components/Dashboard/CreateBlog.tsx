@@ -37,8 +37,6 @@ const CreateBlog = () => {
       );
       return response.data.data.url; // Return the uploaded image URL
     } catch (error) {
-      setError("Failed to upload image to ImageBB");
-      console.error("Image upload error:", error);
       return null;
     }
   };

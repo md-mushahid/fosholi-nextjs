@@ -1,8 +1,8 @@
-// Import necessary modules
 'use client';
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import CreateBlog from "./CreateBlog";
+import Setting from "./Setting";
+import { Image } from "antd";
 
 const membershipData = [
   {
@@ -23,11 +23,6 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [activeSection, setActiveSection] = useState("membership");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [profileImage, setProfileImage] = useState<Blob | null>(null);
-
-  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     const isAnyOneLogin = localStorage.getItem("login_user_data");
@@ -35,56 +30,9 @@ const Dashboard = () => {
       const userData = JSON.parse(isAnyOneLogin);
       setUser(userData);
       setName(userData.name);
-      setEmail(userData.email);
     }
   }, []);
 
-  // Function to handle profile picture upload as blob
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProfileImage(file); // Directly store the file (blob)
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("password", newPassword ? newPassword : user.password);
-    if (profileImage) formData.append("image", profileImage);
-    const updatedUser = {
-      id: user.id,
-      name,
-      email,
-      user_type: user.user_type,
-      password: newPassword || user.password,
-      profile_picture: profileImage || user.image,
-    };
-
-    try {
-      const response = await fetch("http://127.0.0.1:3333/update-user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedUser),
-      });
-      if (response.ok) {
-        localStorage.setItem("login_user_data", JSON.stringify(updatedUser));
-        setUser(updatedUser);
-        window.location.reload();
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to update user: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error("Error updating user:", error);
-      alert("An error occurred while updating the user. Please try again.");
-    }
-
-  };
 
   return (
     <section
@@ -98,9 +46,7 @@ const Dashboard = () => {
               <div className="relative mx-auto mb-4 h-[120px] w-[120px]">
                 <Image
                   src={
-                    user?.image
-                      ? user.image
-                      : "/images/team/blank-profile-picture-973460_640.png"
+                    user?.profile_picture ?? "/images/team/blank-profile-picture-973460_640.png"
                   }
                   alt={user?.name}
                   className="rounded-full"
@@ -183,65 +129,7 @@ const Dashboard = () => {
                 </div>
               )}
               {activeSection === "settings" && (
-                <form onSubmit={handleSubmit} className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 text-dark dark:text-white">
-                    Settings
-                  </h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-dark dark:text-white mb-2">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full border rounded-lg p-2"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-dark dark:text-white mb-2">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border rounded-lg p-2"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-dark dark:text-white mb-2">
-                        Profile Picture
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-dark dark:text-white mb-2">
-                        Password
-                      </label>
-                      <input
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full border rounded-lg p-2"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600"
-                    >
-                      Update Settings
-                    </button>
-                  </div>
-                </form>
+                <Setting />
               )}
               {activeSection === "createBlog" && (
                 <CreateBlog />

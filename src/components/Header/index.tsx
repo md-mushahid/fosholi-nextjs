@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
@@ -9,13 +10,13 @@ import { roundToNearestHours } from "date-fns";
 
 const Header = () => {
   const { data: session } = useSession();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
 
   const dropdownRef = useRef(null);
 
-  const handleOutsideClick = (e) => {
+  const handleOutsideClick = (e: { target: any; }) => {
     if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
       setDropdownOpen(false);
     }
@@ -246,7 +247,7 @@ const Header = () => {
                     <div className="relative flex items-center" ref={dropdownRef}>
                       <img
                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                        src={user?.profilePicture || "/images/team/blank-profile-picture-973460_640.png"}
+                        src={user?.profile_picture || "/images/team/blank-profile-picture-973460_640.png"}
                         alt="Profile"
                         className="w-10 h-10 rounded-full cursor-pointer"
                       />
