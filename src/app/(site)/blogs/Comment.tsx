@@ -4,49 +4,57 @@ import { useEffect, useState } from "react";
 export default function CommentBox({ blogId }) {
   const [comment, setComment] = useState("");
   const [commentsList, setCommentsList] = useState([]);
-  const isAnyOneLogin: any = localStorage.getItem("login_user_data");
-  let userData;
-  if (isAnyOneLogin) {
-    userData = JSON.parse(isAnyOneLogin);
-  }
+  const userData = JSON.parse(localStorage.getItem("login_user_data") || "{}");
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    await axios.post("http://127.0.0.1:3333/create-comment", {
-      blog_id: blogId,
-      parent_id: null,
-      user_id: userData.id,
-      content: comment,
-    });
     if (comment.trim()) {
-      setCommentsList([{ content: comment, replies: [] }, ...commentsList]);
-      setComment("");
+      try {
+        await axios.post("http://127.0.0.1:3333/create-comment", {
+          blog_id: blogId,
+          parent_id: null,
+          user_id: userData.id,
+          content: comment,
+        });
+        setCommentsList([{ content: comment, replies: [] }, ...commentsList]);
+        setComment("");
+      } catch (error) {
+        console.error("Error submitting comment:", error);
+      }
     }
   };
-  useEffect(() => {
-    const getComment = async () => {
-      const res = await axios.get(
-        `http://127.0.0.1:3333/get-comment/${blogId}`,
-      );
-      setCommentsList(res.data);
-    };
-    getComment();
-  }, []);
-  const handleReplySubmit = async(e, index, reply, comment_id) => {
-    console.log("🚀 ~ handleReplySubmit ~ reply:", reply)
-    e.preventDefault();
-    await axios.post("http://127.0.0.1:3333/create-comment", {
-      blog_id: blogId,
-      parent_id: comment_id,
-      user_id: userData.id,
-      content: reply,
-    });
-    if (reply.trim()) {
-      const updatedComments = [...commentsList];
-      updatedComments[index].replies.push(reply);
-      setCommentsList(updatedComments);
-    }
 
+  const handleReplySubmit = async (e, index, reply, comment_id) => {
+    e.preventDefault();
+    if (reply.trim()) {
+      try {
+        await axios.post("http://127.0.0.1:3333/create-comment", {
+          blog_id: blogId,
+          parent_id: comment_id,
+          user_id: userData.id,
+          content: reply,
+        });
+        const updatedComments = commentsList.map((com, idx) =>
+          idx === index ? { ...com, replies: [...com.replies, { content: reply }] } : com
+        );
+        setCommentsList(updatedComments);
+      } catch (error) {
+        console.error("Error submitting reply:", error);
+      }
+    }
   };
+
+  useEffect(() => {
+    const getComments = async () => {
+      try {
+        const res = await axios.get(`http://127.0.0.1:3333/get-comment/${blogId}`);
+        setCommentsList(res.data);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+    getComments();
+  }, [blogId]);
 
   return (
     <div className="mx-auto max-w-2xl rounded-lg border border-gray-200 bg-white p-6 shadow-lg">
@@ -105,10 +113,7 @@ export default function CommentBox({ blogId }) {
                 {com.replies.length > 0 && (
                   <div className="mt-3 space-y-2 border-l-2 border-gray-300 pl-4">
                     {com.replies.map((reply, replyIndex) => (
-                      <div
-                        key={replyIndex}
-                        className="rounded-md bg-gray-100 p-2"
-                      >
+                      <div key={replyIndex} className="rounded-md bg-gray-100 p-2">
                         <p className="text-gray-700">{reply.content}</p>
                       </div>
                     ))}
@@ -118,9 +123,7 @@ export default function CommentBox({ blogId }) {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">
-            No comments yet. Be the first to comment!
-          </p>
+          <p className="text-gray-500">No comments yet. Be the first to comment!</p>
         )}
       </div>
     </div>

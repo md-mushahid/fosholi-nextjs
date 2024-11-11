@@ -3,11 +3,10 @@ import { useEffect, useState } from "react";
 import RightSideBar from "./RightSideBar";
 import CreatePost from "./CreatePost";
 import axios from "axios";
-import { useRouter } from 'next/navigation'; // Updated import
 import { Image } from "antd";
+import { useRouter } from "next/router";
 
 const Community = () => {
-  const router = useRouter();
   const [user, setUser] = useState<any>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState<any>([]);
