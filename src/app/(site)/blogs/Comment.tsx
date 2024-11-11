@@ -11,16 +11,15 @@ export default function CommentBox({ blogId }) {
   }
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    await axios.post("http://127.0.0.1:3333/create-comment", {
+    const res = await axios.post("http://127.0.0.1:3333/create-comment", {
       blog_id: blogId,
       parent_id: null,
       user_id: userData.id,
       content: comment,
     });
-    if (comment.trim()) {
-      setCommentsList([{ content: comment, replies: [] }, ...commentsList]);
-      setComment("");
-    }
+
+    setCommentsList([{ ...res.data, replies: [] }, ...commentsList]);
+    setComment("");
   };
   useEffect(() => {
     const getComment = async () => {
@@ -31,21 +30,17 @@ export default function CommentBox({ blogId }) {
     };
     getComment();
   }, []);
-  const handleReplySubmit = async(e, index, reply, comment_id) => {
-    console.log("🚀 ~ handleReplySubmit ~ reply:", reply)
+  const handleReplySubmit = async (e, index, reply, comment_id) => {
     e.preventDefault();
-    await axios.post("http://127.0.0.1:3333/create-comment", {
+    const res = await axios.post("http://127.0.0.1:3333/create-comment", {
       blog_id: blogId,
       parent_id: comment_id,
       user_id: userData.id,
       content: reply,
     });
-    if (reply.trim()) {
-      const updatedComments = [...commentsList];
-      updatedComments[index].replies.push(reply);
-      setCommentsList(updatedComments);
-    }
-
+    const updatedComments = [...commentsList];
+    updatedComments[index].replies.push(res.data);
+    setCommentsList(updatedComments);
   };
 
   return (
@@ -102,7 +97,7 @@ export default function CommentBox({ blogId }) {
                 </form>
 
                 {/* Display replies */}
-                {com.replies.length > 0 && (
+                {com?.replies?.length > 0 && (
                   <div className="mt-3 space-y-2 border-l-2 border-gray-300 pl-4">
                     {com.replies.map((reply, replyIndex) => (
                       <div
