@@ -1,28 +1,54 @@
+'use client';
 import axios from "axios";
-import React from "react";
-import OfferList from "./OfferList";
-import { Price } from "@/types/price";
-import { useRouter } from "next/router";
+import React, { useEffect } from "react";
 
-const PricingBox = ({ product }: { product: Price }) => {
-  // POST request
+const PricingBox = ({ product }: { product: any }) => {
+  const [user, setUser] = React.useState<any>(null);
+
+  useEffect(() => {
+    const isAnyOneLogin = localStorage.getItem("login_user_data");
+    if (isAnyOneLogin) {
+      const userData = JSON.parse(isAnyOneLogin);
+      setUser(userData);
+    }
+  }, []);
+
   const handleSubscription = async (e: any) => {
     e.preventDefault();
-    const isAnyOneLogin = JSON.parse(localStorage.getItem("login_user_data"));
-    if(!isAnyOneLogin)  window.location.href = 'http://localhost:3000/signin'
+    const isAnyOneLogin: any = JSON.parse(localStorage.getItem("login_user_data"));
+    if (!isAnyOneLogin) window.location.href = "http://localhost:3000/signin";
     const res = await axios.post(
       "http://127.0.0.1:3333/payment",
       {
         product,
-        user_id: isAnyOneLogin.id
+        user_id: isAnyOneLogin.id,
       },
       {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
     window.location.href = res.data.url;
+  };
+
+  // DELETE request to delete pricing
+  const handleDelete = async () => {
+    const isAnyOneLogin = JSON.parse(localStorage.getItem("login_user_data"));
+    if (!isAnyOneLogin) {
+      window.location.href = "http://localhost:3000/signin";
+    }
+
+    try {
+      const res = await axios.post(`http://127.0.0.1:3333/delete-pricing`, { product_id: product.id });
+      if (res.status === 200) {
+        alert("Pricing has been deleted successfully!");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error deleting pricing:", error);
+      alert("Failed to delete pricing.");
+    }
   };
 
   return (
@@ -46,7 +72,7 @@ const PricingBox = ({ product }: { product: Price }) => {
               "en-US",
               {
                 currency: "USD",
-              },
+              }
             )}
           </span>
           <span className="text-base font-normal text-body-color dark:text-dark-6">
@@ -62,6 +88,19 @@ const PricingBox = ({ product }: { product: Price }) => {
             Purchase Now
           </button>
         </div>
+        {
+          user?.user_type !== 'student' &&
+          <>
+            <div className="w-full mt-4">
+              <button
+                onClick={handleDelete}
+                className="inline-block rounded-md bg-red-600 px-7 py-3 text-center text-base font-medium text-white transition duration-300 hover:bg-red-700"
+              >
+                Delete Pricing
+              </button>
+            </div>
+          </>
+        }
       </div>
     </div>
   );

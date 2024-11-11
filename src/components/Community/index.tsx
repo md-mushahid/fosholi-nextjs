@@ -30,9 +30,11 @@ const data = [
   },
 ];
 
-const Community = () => {
+const Community = ({id }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState(data[0]);
+
+  console.log('id', id);
 
   return (
     <>

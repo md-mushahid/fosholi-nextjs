@@ -108,14 +108,14 @@ const Pricing = () => {
             paragraph="Join our comprehensive program designed to empower farmers with the knowledge and skills necessary for modern agricultural practices. Together, we can enhance your productivity and sustainability, ensuring a fruitful future for your farming endeavors."
             center
           />
-          <Button
+          {user?.user_type !== 'student' && <Button
             onClick={handleAddProgram}
             className="mt-4"
             type="primary"
             style={{ backgroundColor: "#1890ff", borderColor: "#1890ff" }}
           >
             Add New Program
-          </Button>
+          </Button>}
         </div>
 
         {/* Pricing Boxes */}

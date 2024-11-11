@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import CreateBlog from "./CreateBlog";
 import Setting from "./Setting";
 import { Image } from "antd";
+import axios from "axios";
+import Link from "next/link";
 
 const membershipData = [
   {
@@ -23,16 +25,26 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [activeSection, setActiveSection] = useState("membership");
   const [name, setName] = useState("");
+  const [membership, setMembership] = useState<any>(null);
 
   useEffect(() => {
     const isAnyOneLogin = localStorage.getItem("login_user_data");
+    let userData = null;
     if (isAnyOneLogin) {
-      const userData = JSON.parse(isAnyOneLogin);
+      userData = JSON.parse(isAnyOneLogin);
       setUser(userData);
       setName(userData.name);
+    } else {
+      window.location.href = "/signin";
     }
+    const getData = async () => {
+      const res = await axios.get(`http://127.0.0.1:3333/get-memberships/${userData?.id}`);
+      setMembership(res.data);
+    };
+    getData();
   }, []);
 
+  console.log('membership', membership);
 
   return (
     <section
@@ -77,7 +89,7 @@ const Dashboard = () => {
                 >
                   Settings
                 </button>
-                {user?.membershipType !== "Student" && (
+                {user?.user_type !== "student" && (
                   <button
                     className={`w-full text-left py-2 font-medium text-dark dark:text-white hover:bg-gray-200 dark:hover:bg-dark-3 transform hover:scale-105 transition duration-200 ${activeSection === "createBlog" ? "bg-gray-200 dark:bg-dark-3" : ""
                       }`}
@@ -105,25 +117,28 @@ const Dashboard = () => {
                     Membership
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {membershipData.map((membership) => (
-                      <div
-                        key={membership.id}
-                        className="bg-gray-100 dark:bg-dark-4 p-4 rounded-lg shadow-md"
-                      >
-                        <Image
-                          src={membership.thumbnail}
-                          alt={membership.courseName}
-                          width={150}
-                          height={100}
-                          className="w-full h-auto rounded-md mb-4"
-                        />
-                        <p className="text-sm font-semibold text-dark dark:text-white">
-                          {membership.courseName}
-                        </p>
-                        <p className="text-xs text-body-color dark:text-dark-6">
-                          {membership.membershipType} Membership
-                        </p>
-                      </div>
+                    {membership?.map((value: any) => (
+                      <>
+                        <div
+                          className="relative z-10 mb-10 overflow-hidden rounded-xl bg-white px-8 py-10 shadow-[0px_0px_40px_0px_rgba(0,0,0,0.08)] dark:bg-dark-2 sm:p-12 lg:px-6 lg:py-10 xl:p-14"
+                          data-wow-delay=".1s"
+                        >
+                          <span className="mb-5 block text-xl font-medium text-dark dark:text-white">
+                            {value?.title}
+                          </span>
+                          <h2 className="mb-11 text-4xl font-semibold text-dark dark:text-white xl:text-[42px] xl:leading-[1.21]">
+                          </h2>
+                          <div className="w-full">
+                            <Link href={`/community?communityId=${value?.id}`}>
+                              <button
+                                className="inline-block rounded-md bg-primary px-7 py-3 text-center text-base font-medium text-white transition duration-300 hover:bg-primary/90"
+                              >
+                                View
+                              </button>
+                            </Link>
+                          </div>
+                        </div>
+                      </>
                     ))}
                   </div>
                 </div>
