@@ -18,7 +18,7 @@ export default function CommentBox({ blogId }) {
       content: comment,
     });
 
-    setCommentsList([res.data, ...commentsList]);
+    setCommentsList([{ ...res.data, replies: [] }, ...commentsList]);
     setComment("");
   };
   useEffect(() => {
@@ -31,7 +31,6 @@ export default function CommentBox({ blogId }) {
     getComment();
   }, []);
   const handleReplySubmit = async (e, index, reply, comment_id) => {
-    console.log("🚀 ~ handleReplySubmit ~ reply:", index, comment_id);
     e.preventDefault();
     const res = await axios.post("http://127.0.0.1:3333/create-comment", {
       blog_id: blogId,
