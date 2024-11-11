@@ -1,14 +1,22 @@
 'use client';
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const PricingBox = ({ product }: { product: any }) => {
   const [user, setUser] = React.useState<any>(null);
+  const [isPurchased, setIsPurchsed] = useState(false);
 
   useEffect(() => {
-    const isAnyOneLogin = localStorage.getItem("login_user_data");
+    const isAnyOneLogin: any = localStorage.getItem("login_user_data");
     if (isAnyOneLogin) {
       const userData = JSON.parse(isAnyOneLogin);
+      const checkIsPurchased = async () => {
+        const res: any = await axios.get(`http://127.0.0.1:3333/get-purchased-pricing/${userData.id}/${product.id}`);
+        if (res === true) {
+          setIsPurchsed(true);
+        }
+      };
+      checkIsPurchased();
       setUser(userData);
     }
   }, []);
@@ -81,12 +89,23 @@ const PricingBox = ({ product }: { product: any }) => {
           </span>
         </h2>
         <div className="w-full">
-          <button
-            onClick={handleSubscription}
-            className="inline-block rounded-md bg-primary px-7 py-3 text-center text-base font-medium text-white transition duration-300 hover:bg-primary/90"
-          >
-            Purchase Now
-          </button>
+          {
+            isPurchased || user?.user_type !== 'student' ?
+              <button
+                onClick={()=> window.location.href = `/community?communityId=${product.id}`}
+                className="inline-block rounded-md bg-primary px-7 py-3 text-center text-base font-medium text-white transition duration-300 hover:bg-primary/90"
+              >
+                View
+              </button> :
+              <button
+                onClick={handleSubscription}
+                className="inline-block rounded-md bg-primary px-7 py-3 text-center text-base font-medium text-white transition duration-300 hover:bg-primary/90"
+              >
+                Purchase Now
+              </button>
+
+          }
+
         </div>
         {
           user?.user_type !== 'student' &&

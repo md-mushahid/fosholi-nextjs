@@ -6,26 +6,11 @@ import { Image } from "antd";
 import axios from "axios";
 import Link from "next/link";
 
-const membershipData = [
-  {
-    id: 1,
-    courseName: "Advanced UI Design",
-    membershipType: "Premium",
-    thumbnail: "/images/courses/course-01.png",
-  },
-  {
-    id: 2,
-    courseName: "JavaScript Essentials",
-    membershipType: "Standard",
-    thumbnail: "/images/courses/course-02.png",
-  },
-];
-
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [activeSection, setActiveSection] = useState("membership");
   const [name, setName] = useState("");
-  const [membership, setMembership] = useState<any>(null);
+  const [membership, setMembership] = useState([]);
 
   useEffect(() => {
     const isAnyOneLogin = localStorage.getItem("login_user_data");
@@ -39,12 +24,12 @@ const Dashboard = () => {
     }
     const getData = async () => {
       const res = await axios.get(`http://127.0.0.1:3333/get-memberships/${userData?.id}`);
-      setMembership(res.data);
+      if (res?.status === 200) {
+        setMembership(res.data);
+      }
     };
     getData();
   }, []);
-
-  console.log('membership', membership);
 
   return (
     <section
@@ -98,13 +83,6 @@ const Dashboard = () => {
                     Create Blog
                   </button>
                 )}
-                <button
-                  className={`w-full text-left py-2 font-medium text-dark dark:text-white hover:bg-gray-200 dark:hover:bg-dark-3 transform hover:scale-105 transition duration-200 ${activeSection === "appointment" ? "bg-gray-200 dark:bg-dark-3" : ""
-                    }`}
-                  onClick={() => setActiveSection("appointment")}
-                >
-                  Appointment
-                </button>
               </div>
             </div>
           </div>
@@ -117,7 +95,7 @@ const Dashboard = () => {
                     Membership
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {membership?.map((value: any) => (
+                    {membership?.length > 0 && membership?.map((value: any) => (
                       <>
                         <div
                           className="relative z-10 mb-10 overflow-hidden rounded-xl bg-white px-8 py-10 shadow-[0px_0px_40px_0px_rgba(0,0,0,0.08)] dark:bg-dark-2 sm:p-12 lg:px-6 lg:py-10 xl:p-14"
@@ -148,14 +126,6 @@ const Dashboard = () => {
               )}
               {activeSection === "createBlog" && (
                 <CreateBlog />
-              )}
-              {activeSection === "appointment" && (
-                <div>
-                  <h4 className="text-xl font-semibold mb-4 text-dark dark:text-white">
-                    Appointment
-                  </h4>
-                  <p>Your appointments will be displayed here.</p>
-                </div>
               )}
             </div>
           </div>
