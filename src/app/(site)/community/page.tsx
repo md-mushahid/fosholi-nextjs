@@ -1,13 +1,9 @@
 import Community from "@/components/Community";
 
-type Props = {
-  params: { id: number };
-};
-
-const CommunityPage = ({params}: Props) => {
+const CommunityPage = () => {
   return (
     <main>
-      <Community id={params} />
+      <Community />
     </main>
   );
 };
