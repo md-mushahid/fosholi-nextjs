@@ -44,6 +44,19 @@ const CreateBlog = () => {
   const handleBlogSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const trimmedTitle = blogTitle.trim();  // Remove leading/trailing spaces
+    const titlePattern = /^[a-zA-Z\s.]+$/;
+    if (!trimmedTitle || !titlePattern.test(trimmedTitle)) {
+      alert("Title should only contain letters, spaces, and periods and cannot be empty.");
+      return;
+    }
+
+    const trimmedContent = blogContent.trim();  // Remove leading/trailing spaces
+    if (!trimmedContent) {
+      alert("Content cannot be empty.");
+      return;
+    }
+
     // Check if title and content are provided
     if (!blogTitle || !blogContent) {
       setError("Please fill in all required fields.");
@@ -76,6 +89,7 @@ const CreateBlog = () => {
         setBlogTitle("");
         setBlogImage(null);
         setBlogContent("");
+        window.location.reload();
       } else {
         setError("Failed to create blog");
       }
@@ -120,6 +134,7 @@ const CreateBlog = () => {
           <input
             type="file"
             accept="image/*"
+            value={blogImage}
             onChange={handleBlogImageChange}
             className="w-full"
           />

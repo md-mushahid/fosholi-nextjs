@@ -4,7 +4,7 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import axios from "axios";
 
-const CreatePost = ({ isModalOpen, setIsModalOpen }: any) => {
+const CreatePost = ({communityId, isModalOpen, setIsModalOpen}: any) => {
   const [user, setUser] = useState<any>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -29,13 +29,14 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }: any) => {
       additional_images: JSON.stringify(images),
       additional_videos: JSON.stringify(videos),
       created_by: user?.id,
-      program_id: 1,
+      program_id: communityId,
     };
 
     const res = await axios.post('http://127.0.0.1:3333/create-post', data);
 
     if (res.status === 200) {
       alert('Content added successfully!');
+      window.location.reload();
     } else {
       alert('Error adding content');
     }

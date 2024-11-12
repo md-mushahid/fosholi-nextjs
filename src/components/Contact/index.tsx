@@ -6,10 +6,31 @@ const Contact = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachment, setAttachment] = useState<File | any>(null);
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
+
+    const trimmedName = name.trim();  // Remove leading/trailing spaces
+    const namePattern = /^[a-zA-Z\s.]+$/;
+    if (!trimmedName || !namePattern.test(trimmedName)) {
+      alert("Name should only contain letters, spaces, and periods and cannot be empty.");
+      return;
+    }
+
+    const trimmedEmail = email.trim();  // Remove leading/trailing spaces
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!trimmedEmail || !emailPattern.test(trimmedEmail)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    const trimmedMessage = message.trim();  // Remove leading/trailing spaces
+    if (!trimmedMessage) {
+      alert("Message cannot be empty.");
+      return;
+    }
+
     const data = {
       name: name,
       email: email,
@@ -35,7 +56,9 @@ const Contact = () => {
 
 
   return (
-    <section id="contact" className="relative py-20 md:py-[120px]">
+    <section id="contact" className="relative py-20 md:py-[120px]"
+    style={{ backgroundImage: `url('/img/bg-2.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
       <div className="container px-4">
         <div className="-mx-4 flex flex-wrap items-center">
           <div className="w-full px-4 lg:w-7/12 xl:w-8/12">
@@ -90,7 +113,8 @@ const Contact = () => {
                     type="file"
                     name="attachment"
                     accept="image/*"
-                    onChange={(e)=> setAttachment(e.target.files[0])}
+                    value={attachment}
+                    onChange={(e: any)=> setAttachment(e.target.files[0])}
                     className="w-full text-dark placeholder:text-body-color/60 dark:text-white"
                   />
                 </div>

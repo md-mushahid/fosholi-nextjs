@@ -8,7 +8,6 @@ const Setting = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [oldPassword, setOldPassword] = useState("");
 
   useEffect(() => {
     const isAnyOneLogin = localStorage.getItem("login_user_data");
@@ -50,10 +49,26 @@ const Setting = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // if (oldPassword != user.password) {
-    //   alert("Passwords do not match. Please try again.");
-    //   return;
-    // }
+    const trimmedName = name.trim();  // Remove leading/trailing spaces
+    const namePattern = /^[a-zA-Z\s.]+$/;
+    if (!trimmedName || !namePattern.test(trimmedName)) {
+      alert("Name should only contain letters, spaces, and periods and cannot be empty.");
+      return;
+    }
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email || !emailPattern.test(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (newPassword.length) {
+      const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      if (!newPassword || !passwordPattern.test(newPassword)) {
+        alert("Password must be at least 8 characters long and contain at least one letter and one number.");
+        return;
+      }
+    }
 
     const imageUrl = await uploadImageToImageBB();
 
@@ -78,7 +93,7 @@ const Setting = () => {
         body: JSON.stringify(updatedUser),
       });
       if (response.ok) {
-        localStorage.setItem("login_user_data", JSON.stringify(updatedUser));
+        localStorage.setItem("login_user_data", JSON.stringify({...updatedUser, user_type: user?.user_type}));
         setUser(updatedUser);
         window.location.reload();
       } else {
@@ -143,19 +158,6 @@ const Setting = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full border rounded-lg p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-dark dark:text-white mb-2">
-              password
-            </label>
-            <input
-              type="password"
-              placeholder="Conferm your password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              className="w-full border rounded-lg p-2"
-              required // Add the required attribute here
             />
           </div>
           <button

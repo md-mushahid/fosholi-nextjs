@@ -24,7 +24,10 @@ const PricingBox = ({ product }: { product: any }) => {
   const handleSubscription = async (e: any) => {
     e.preventDefault();
     const isAnyOneLogin: any = JSON.parse(localStorage.getItem("login_user_data"));
-    if (!isAnyOneLogin) window.location.href = "http://localhost:3000/signin";
+    if (!isAnyOneLogin) {
+      window.location.href = "http://localhost:3000/signin";
+      return;
+    }
     const res = await axios.post(
       "http://127.0.0.1:3333/payment",
       {
@@ -85,12 +88,12 @@ const PricingBox = ({ product }: { product: any }) => {
           </span>
           <span className="text-base font-normal text-body-color dark:text-dark-6">
             {" "}
-            {product?.is_lifetime_access ? "Lifetime" : "Per Month"}
+            {product.subscription_type === 'one-time' ? "For One Season" : "Per Month"}
           </span>
         </h2>
         <div className="w-full">
           {
-            isPurchased || user?.user_type !== 'student' ?
+            isPurchased || user?.user_type === 'instructor' ?
               <button
                 onClick={()=> window.location.href = `/community?communityId=${product.id}`}
                 className="inline-block rounded-md bg-primary px-7 py-3 text-center text-base font-medium text-white transition duration-300 hover:bg-primary/90"
@@ -108,7 +111,7 @@ const PricingBox = ({ product }: { product: any }) => {
 
         </div>
         {
-          user?.user_type !== 'student' &&
+          user?.user_type === 'instructor' &&
           <>
             <div className="w-full mt-4">
               <button

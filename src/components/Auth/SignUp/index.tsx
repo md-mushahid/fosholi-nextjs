@@ -12,10 +12,32 @@ const SignUp = () => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    setLoading(true);
     const data = new FormData(e.currentTarget);
     const value = Object.fromEntries(data.entries());
     const finalData = { ...value };
+    const { name, email, password }: any = finalData;
+
+    const trimmedName = name.trim();  // Remove leading/trailing spaces
+
+    const namePattern = /^[a-zA-Z\s.]+$/;
+    if (!trimmedName || !namePattern.test(trimmedName)) {
+      alert("Name should only contain letters, spaces, and periods and cannot be empty.");
+      return;
+    }
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email || !emailPattern.test(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!password || !passwordPattern.test(password)) {
+      alert("Password must be at least 8 characters long and contain at least one letter and one number.");
+      return;
+    }
+
+    setLoading(true);
 
     fetch("http://127.0.0.1:3333/admin/signup", {  // Update the API endpoint here
       method: "POST",
@@ -43,7 +65,9 @@ const SignUp = () => {
   };
 
   return (
-    <section className="bg-[#F4F7FF] py-14 dark:bg-dark lg:py-[90px]">
+    <section className="bg-[#F4F7FF] py-14 dark:bg-dark lg:py-[90px]"
+      style={{ backgroundImage: `url('/img/bg-2.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
       <div className="container">
         <div className="-mx-4 flex flex-wrap">
           <div className="w-full px-4">

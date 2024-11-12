@@ -19,6 +19,9 @@ const Dashboard = () => {
       userData = JSON.parse(isAnyOneLogin);
       setUser(userData);
       setName(userData.name);
+      if (userData.user_type !== 'student') {
+        setActiveSection("settings");
+      }
     } else {
       window.location.href = "/signin";
     }
@@ -55,18 +58,23 @@ const Dashboard = () => {
                 <h3 className="text-lg font-semibold text-dark dark:text-white">
                   {user?.name}
                 </h3>
+                {
+                  user?.user_type != 'student' && <p>Instructor</p>
+                }
               </div>
             </div>
 
             <div className="rounded-xl bg-white p-6 shadow dark:bg-dark dark:shadow-none">
               <div className="space-y-2">
-                <button
-                  className={`w-full text-left py-2 font-medium text-dark dark:text-white hover:bg-gray-200 dark:hover:bg-dark-3 transform hover:scale-105 transition duration-200 ${activeSection === "membership" ? "bg-gray-200 dark:bg-dark-3" : ""
-                    }`}
-                  onClick={() => setActiveSection("membership")}
-                >
-                  Membership
-                </button>
+                {
+                  user?.user_type === 'student' && <button
+                    className={`w-full text-left py-2 font-medium text-dark dark:text-white hover:bg-gray-200 dark:hover:bg-dark-3 transform hover:scale-105 transition duration-200 ${activeSection === "membership" ? "bg-gray-200 dark:bg-dark-3" : ""
+                      }`}
+                    onClick={() => setActiveSection("membership")}
+                  >
+                    Membership
+                  </button>
+                }
                 <button
                   className={`w-full text-left py-2 font-medium text-dark dark:text-white hover:bg-gray-200 dark:hover:bg-dark-3 transform hover:scale-105 transition duration-200 ${activeSection === "settings" ? "bg-gray-200 dark:bg-dark-3" : ""
                     }`}

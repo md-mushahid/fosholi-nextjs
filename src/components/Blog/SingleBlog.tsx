@@ -15,6 +15,7 @@ const SingleBlog = ({ blog }: any) => {
             className="w-full transition group-hover:rotate-6 group-hover:scale-125"
             width={408}
             height={272}
+            preview={false}
           />
         </Link>
       </div>

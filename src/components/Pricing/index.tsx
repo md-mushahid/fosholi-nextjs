@@ -100,6 +100,7 @@ const Pricing = () => {
     <section
       id="pricing"
       className="relative z-20 overflow-hidden bg-white pb-12 pt-20 dark:bg-dark lg:pb-[90px] lg:pt-[120px]"
+      style={{ backgroundImage: `url('/img/bg-2.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="container">
         <div className="mb-[60px]">
@@ -108,7 +109,7 @@ const Pricing = () => {
             paragraph="Join our comprehensive program designed to empower farmers with the knowledge and skills necessary for modern agricultural practices. Together, we can enhance your productivity and sustainability, ensuring a fruitful future for your farming endeavors."
             center
           />
-          {user?.user_type !== 'student' && <Button
+          {user?.user_type == 'instructor' && <Button
             onClick={handleAddProgram}
             className="mt-4"
             type="primary"
